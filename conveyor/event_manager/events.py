@@ -7,6 +7,9 @@ class Event(object):
     def __init__(self):
         self.name = "Generic Event"
 
+    def __str__(self):
+        return self.name
+
 class PreloadEvent(Event):
     ''' Superclass of any Preload event, this is used to trigger the
         creation of objects from the config file settings.
@@ -70,6 +73,9 @@ class DrawLayerEvent(Event):
         self.surface = surface
         self.rectangle = rectangle
         self.scale_factor = scale_factor
+
+    def __str__(self):
+        return "%s: %s"%(self.name, self.layer)
 
 class RefreshScreenEvent(Event):
     ''' Refresh the screen.

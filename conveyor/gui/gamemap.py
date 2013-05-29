@@ -51,7 +51,7 @@ class Map(Drawable):
         self._active = active
 
     def _cache_surface(self):
-        self.original_image.fill((255,255,255))
+        self.original_image.fill((0,0,0,0))
 
         row_idx = 0
         char_idx = 0
@@ -81,7 +81,7 @@ class Map(Drawable):
             return
         else:
             surface.blit(self.image.subsurface(intersection), (intersection.x - rectangle.x, intersection.y - rectangle.y))
-        
+
         
 
         

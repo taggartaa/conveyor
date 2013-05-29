@@ -50,7 +50,6 @@ class ConfigurationController(object):
                     if len(properties) != 0:
                         self._event_manager.post(NewEvent(properties))
                     properties = dict()
-                    NewEvent = None
                 else:
                     key,value = line.split(':', 1)
 

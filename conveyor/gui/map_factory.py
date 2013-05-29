@@ -1,5 +1,6 @@
 from gamemap import Map
 from conveyor.event_manager.events import MapPreloadEvent, MapCreatedEvent, QuitEvent
+from xml.dom import minidom
 import os
 
 class MapFactory(object):
@@ -20,7 +21,10 @@ class MapFactory(object):
             event - the event that occured.
         '''
         if isinstance(event, MapPreloadEvent):
-            self._create_map(event.properties)
+            if event.properties['type'] == 'map':
+                self._create_map(event.properties)
+            elif event.properties['type'] in ['xml', 'tmx']:
+                self._create_map_from_xml(event.properties)
 
         elif isinstance(event, QuitEvent):
             self._event_manager.unregister_listener(self)
@@ -38,6 +42,23 @@ class MapFactory(object):
         game_map = Map(key, self._event_manager, layer, sprite_sheet_key, tile_map, char_definitions, active)
         self._event_manager.post(MapCreatedEvent(game_map))
 
+    def _create_map_from_xml(self, properties):
+        ''' Creates maps from an xml document '''
+        count = 0
+        key = properties['key']
+        sprite_sheet_key = properties['sprite']
+        active = properties['active'].lower() == 'true'
+
+        xmldoc = minidom.parse(properties['map'])
+        for layer in xmldoc.getElementsByTagName('layer'):
+            layer_name = layer.getAttribute('name')
+            tile_map, char_definitions = self._get_tile_map_xml(layer)
+            game_map = Map('%s_%s'%(key, count), self._event_manager, layer_name, sprite_sheet_key, tile_map, char_definitions, active)
+            self._event_manager.post(MapCreatedEvent(game_map))
+            count += 1
+            
+        
+
     def _get_tile_map(self, filename):
         ''' private function that reads tile placement from a file.
             filename - name of file that the tile_map is in.
@@ -47,6 +68,24 @@ class MapFactory(object):
         for line in map_file:
             tile_map.append(line.strip('\n'))
         return tile_map
+
+    def _get_tile_map_xml(self, layer):
+        tile_map = []
+        char_definitions = dict()
+        width = int(layer.getAttribute('width'))
+        count = width
+        for tile in layer.getElementsByTagName('tile'):
+            if count == width:
+                tile_map.append([])
+                count = 0
+            gid = int(tile.getAttribute('gid'))-1
+            tile_map[-1].append(gid)
+            if gid > 0 and not char_definitions.has_key(gid):
+                char_definitions[gid] = gid
+            count += 1
+        return tile_map, char_definitions
+        
+        
 
     def _get_char_definitions(self, def_string):
         ''' private function that builds a dictionary that maps characters to their sprite number.

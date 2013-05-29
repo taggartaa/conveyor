@@ -11,7 +11,7 @@ class SpriteSheet(object):
         self.width, self.height = sheet_size
         self.tile_width, self.tile_height = tile_size
         self.filename = filename
-        self._sheet = pygame.image.load(self.filename).convert()
+        self._sheet = pygame.image.load(self.filename).convert_alpha()
         self._load_images()
 
 
@@ -26,19 +26,13 @@ class SpriteSheet(object):
                 
         self._sprites = self._images_at(rects)
     
-    def _image_at(self, rectangle, colorkey = None):
+    def _image_at(self, rectangle):
         '''Loads image from x,y,x+offset,y+offset'''
-        image = pygame.Surface(rectangle.size).convert()
-        image.blit(self._sheet, (0, 0), rectangle)
-        if colorkey is not None:
-            if colorkey is -1:
-                colorkey = image.get_at((0,0))
-            image.set_colorkey(colorkey, pygame.RLEACCEL)
-        return image
+        return self._sheet.subsurface(rectangle)
     
-    def _images_at(self, rects, colorkey = None):
+    def _images_at(self, rects):
         '''Loads multiple images, supply a list of coordinates''' 
-        return [self._image_at(rect, colorkey) for rect in rects]
+        return [self._image_at(rect) for rect in rects]
 
     def __getitem__(self, index):
         return self._sprites[index]

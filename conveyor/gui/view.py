@@ -58,7 +58,7 @@ class View(object):
             if isinstance(event.obj, Drawable):
                 if event.obj.layer not in self._layers:
                     self._layers.append(event.obj.layer)
-                    self._layers.sort()
+                    #self._layers.sort()
                     
         elif isinstance(event, GameStartedEvent):
             self._event_manager.unregister_listener(self, [GameStartedEvent])
@@ -105,8 +105,8 @@ class View(object):
         self._scroll_buffer -= self._scroll_buffer.int()
         
     def _get_surface(self):
-        surface = pygame.Surface((self._view_rectangle.width, self._view_rectangle.height))
-        surface.fill((255,255,255))
+        surface = pygame.Surface((self._view_rectangle.width, self._view_rectangle.height), pygame.SRCALPHA, 32)
+        surface.fill((255,255,255,255))
         return surface
         
     def _redraw(self, milseconds_passed):

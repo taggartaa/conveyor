@@ -7,11 +7,12 @@ from conveyor.event_manager.events import *
 class Debugger(object):
     def __init__(self, event_manager):
         self._event_manager = event_manager
-        self._event_manager.register_listener(self, [ScrollEvent, ZoomEvent])
+        self._event_manager.register_listener(self, [DrawLayerEvent])
 
     def notify(self, event):
-        print("%s: %s"%(type(event), event))
-        print(event.name)
+        i = raw_input("%s"%(event))
+        if i != '':
+            self._event_manager.unregister_listener(self)
 
 class FpsViewer(object):
     def __init__(self, event_manager):

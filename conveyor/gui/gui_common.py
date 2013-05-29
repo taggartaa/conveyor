@@ -38,7 +38,7 @@ class Drawable(Sprite):
         Sprite.__init__(self)
 
         self._original_rect = Rectangle(x, y, width, height)
-        self.original_image = pygame.Surface((width, height))
+        self.original_image = pygame.Surface((width, height), pygame.SRCALPHA, 32)
 
         self.rect = Rectangle(x, y, width, height)
         self.image = self.original_image.copy()
@@ -67,7 +67,7 @@ class Drawable(Sprite):
         self.rect.size = self._original_rect.size = value
         
         tmp = self.original_image
-        self.original_image = pygame.Surface(self.rect.size)
+        self.original_image = pygame.Surface(self.rect.size, pygame.SRCALPHA, 32)
         self.original_image.blit(tmp, (0,0))
         self.update_cache()
 
@@ -110,7 +110,7 @@ class Drawable(Sprite):
 
     def _scale(self, factor):
         self.rect = self._original_rect.scaled(1.0/factor)
-        self.image = pygame.transform.smoothscale(self._original_image, self.rect.size)
+        self.image = pygame.transform.smoothscale(self.original_image, self.rect.size)
         self.scale_factor = factor
 
     def update_cache(self):
