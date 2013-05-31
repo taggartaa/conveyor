@@ -2,11 +2,7 @@ import re
 import os
 from conveyor.event_manager.events import SpriteSheetPreloadEvent, MapPreloadEvent, TickEvent, ResourcesLoadedEvent, QuitEvent
 from conveyor.gui import MapFactory, SpriteSheetFactory
-
-def _intersperse(lst, item):
-    result = [item] * (len(lst) * 2 - 1)
-    result[0::2] = lst
-    return result
+from xml.dom import minidom
 
 class ConfigurationController(object):
     def __init__(self, event_manager, data_path):
@@ -14,11 +10,13 @@ class ConfigurationController(object):
         self._event_manager.register_listener(self, [TickEvent, QuitEvent])
         self._map_factory = MapFactory(self._event_manager)
         self._sprite_sheet_factory = SpriteSheetFactory(self._event_manager)
+	
+        self._tags = {'sprite' :     SpriteSheetPreloadEvent,
+                      'map' :        MapPreloadEvent}
 
-        self._paths = dict()
-        self._paths['{DATA_PATH}'] = data_path
-        self._paths['{IMAGES}'] = 'images'
-        self._paths['{MAPS}'] = 'maps'
+        self._paths = {'{DATA_PATH}' :      data_path,
+                       '{IMAGES}' :         'images',
+                       '{MAPS}' :           'maps'}
 
     def notify(self, event):
         if isinstance(event, TickEvent):
@@ -33,36 +31,30 @@ class ConfigurationController(object):
     def _process_config_file(self):
         ''' Process the config file and fire off events to generate proper structures.
         '''
-        config_file = open(os.path.join(self._paths['{DATA_PATH}'], 'config.ini'))
+        config_file = open(os.path.join(self._paths['{DATA_PATH}'], 'config.xml'))
 
         try:
-            NewEvent = None
-            properties = dict()
-            for ln in config_file:
-                line = ln.strip()
-                if line == '[SPRITES]':
-                    NewEvent = SpriteSheetPreloadEvent
-                elif line == '[MAPS]':
-                    NewEvent = MapPreloadEvent
-                elif line == 'END':
-                    pass
-                elif line == '':
-                    if len(properties) != 0:
-                        self._event_manager.post(NewEvent(properties))
+            xmldoc = minidom.parse(config_file)
+	    
+            for tag_name, EventType in self._tags.items():
+                for element in xmldoc.getElementsByTagName(tag_name):
                     properties = dict()
-                else:
-                    key,value = line.split(':', 1)
-
-                    value_split = re.split('(%s)'%('|'.join(self._paths.keys())), value)
-                    for i in range(len(value_split)):
-                        if self._paths.has_key(value_split[i]):
-                            value_split[i] = self._paths[value_split[i]]
-      
-                    if len(value_split) > 1:
-                        value = os.path.join(*value_split)
-                    
-                    properties[key] = value
+                    for key, value in element.attributes.items():
+                        properties[key] = self._replace_paths(value)
+                    self._event_manager.post(EventType(properties))
         except:
             raise
         finally:
             config_file.close()
+            
+    def _replace_paths(self, value):
+        value_split = re.split('(%s)'%('|'.join(self._paths.keys())), value)
+        for i in range(len(value_split)):
+            if self._paths.has_key(value_split[i]):
+                value_split[i] = self._paths[value_split[i]]
+      
+        if len(value_split) > 1:
+            value = os.path.join(*value_split)
+                    
+        return value
+
