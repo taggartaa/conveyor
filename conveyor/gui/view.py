@@ -3,8 +3,12 @@ from conveyor.event_manager.events import GameStartedEvent, TickEvent, DrawLayer
                                           StartScrollDownEvent, StartScrollLeftEvent, StartScrollRightEvent, \
                                           StopScrollUpEvent, StopScrollDownEvent, StopScrollLeftEvent, StopScrollRightEvent, \
                                           StartZoomInEvent, StartZoomOutEvent, ZoomEvent, QuitEvent
+                                          
+from conveyor.event_manager import event_manager
                           
-from gui_common import Drawable, Rectangle
+from gui_common import Drawable
+from conveyor.collision_detection.shapes import Rectangle
+from conveyor.collision_detection import RectangleCollisionDetectorNoRotation as CollisionDetector
 from conveyor.common import DIRECTION, ZOOM, MOUSESCROLLUP, MOUSESCROLLDOWN
 from conveyor.math import Vector
 import pygame
@@ -13,12 +17,12 @@ import pygame.transform
 import copy
 
 class View(object):
-    def __init__(self, event_manager):
-        self._event_manager = event_manager
-        self._event_manager.register_listener(self, [GameStartedEvent, FactoryObjectCreatedEvent,
+    def __init__(self):
+        event_manager.register_listener(self, [GameStartedEvent, FactoryObjectCreatedEvent,
                                                      RefreshScreenEvent, ScrollEvent, ZoomEvent, QuitEvent])
         self._original_view_rectangle = Rectangle(0, 0, 500, 500)
         self._view_rectangle = Rectangle(0, 0, 500, 500)
+        self._view_bounds = None
         self._setup_pygame()
         self._setup_keyboard_events()
         self._layers = []
@@ -27,18 +31,18 @@ class View(object):
         self._scale_factor = 1
 
     def _setup_keyboard_events(self):
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYDOWN, pygame.locals.K_UP   , StartScrollUpEvent))
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYDOWN, pygame.locals.K_DOWN , StartScrollDownEvent))
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYDOWN, pygame.locals.K_LEFT , StartScrollLeftEvent))
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYDOWN, pygame.locals.K_RIGHT, StartScrollRightEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYDOWN, pygame.locals.K_UP   , StartScrollUpEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYDOWN, pygame.locals.K_DOWN , StartScrollDownEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYDOWN, pygame.locals.K_LEFT , StartScrollLeftEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYDOWN, pygame.locals.K_RIGHT, StartScrollRightEvent))
         
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYUP, pygame.locals.K_UP   , StopScrollUpEvent))
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYUP, pygame.locals.K_DOWN , StopScrollDownEvent))
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYUP, pygame.locals.K_LEFT , StopScrollLeftEvent))
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYUP, pygame.locals.K_RIGHT, StopScrollRightEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYUP, pygame.locals.K_UP   , StopScrollUpEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYUP, pygame.locals.K_DOWN , StopScrollDownEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYUP, pygame.locals.K_LEFT , StopScrollLeftEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.KEYUP, pygame.locals.K_RIGHT, StopScrollRightEvent))
 
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.MOUSEBUTTONDOWN, MOUSESCROLLUP,   StartZoomInEvent))
-        self._event_manager.post(RegisterKeyboardEvent(pygame.locals.MOUSEBUTTONDOWN, MOUSESCROLLDOWN, StartZoomOutEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.MOUSEBUTTONDOWN, MOUSESCROLLUP,   StartZoomInEvent))
+        event_manager.post(RegisterKeyboardEvent(pygame.locals.MOUSEBUTTONDOWN, MOUSESCROLLDOWN, StartZoomOutEvent))
         
 
     def notify(self, event):
@@ -61,12 +65,12 @@ class View(object):
                     #self._layers.sort()
                     
         elif isinstance(event, GameStartedEvent):
-            self._event_manager.unregister_listener(self, [GameStartedEvent])
-            self._event_manager.register_listener(self, [TickEvent])
+            event_manager.unregister_listener(self, [GameStartedEvent])
+            event_manager.register_listener(self, [TickEvent])
             
         elif isinstance(event, QuitEvent):
             pygame.display.quit()
-            self._event_manager.unregister_listener(self)
+            event_manager.unregister_listener(self)
             
     def _setup_pygame(self):
         pygame.init()
@@ -98,11 +102,22 @@ class View(object):
             self._scale_factor = 1
 
     def _scroll(self, multiplier = 1):
+        
         self._scroll_buffer += (self._scroll_velocity * multiplier)
+        
         self._view_rectangle.x += int(self._scroll_buffer.x)
         self._view_rectangle.y += int(self._scroll_buffer.y)
 
         self._scroll_buffer -= self._scroll_buffer.int()
+        
+        self._check_bounds()
+        
+    def _check_bounds(self):
+        if self._view_bounds == None:
+            return True
+        else:
+            return False
+            
         
     def _get_surface(self):
         surface = pygame.Surface((self._view_rectangle.width, self._view_rectangle.height), pygame.SRCALPHA, 32)
@@ -113,9 +128,9 @@ class View(object):
         self._scroll(milseconds_passed/10.0)
         surface = self._get_surface()
         for layer in self._layers:
-            self._event_manager.post(DrawLayerEvent(layer, surface, self._view_rectangle, self._scale_factor))
+            event_manager.post(DrawLayerEvent(layer, surface, self._view_rectangle, self._scale_factor))
 
-        self._event_manager.post(RefreshScreenEvent(surface))
+        event_manager.post(RefreshScreenEvent(surface))
 
     def _refresh(self, surface):
         self._window.blit(surface, (0,0))

@@ -87,3 +87,5 @@ class EventManager(object):
         '''
         self._event_queue.append(event)
 #------------------------------------------------------------------------------
+
+event_manager = EventManager()

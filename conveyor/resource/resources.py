@@ -1,9 +1,9 @@
 from conveyor.event_manager.events import FactoryObjectCreatedEvent, QuitEvent
+from conveyor.event_manager import event_manager
 
 class Resources(object):
-    def __init__(self, event_manager):
-        self._event_manager = event_manager
-        self._event_manager.register_listener(self, [FactoryObjectCreatedEvent])
+    def __init__(self):
+        event_manager.register_listener(self, [FactoryObjectCreatedEvent])
         self.resource_dictionary = dict()
 
     def notify(self, event):
@@ -12,4 +12,9 @@ class Resources(object):
                 self.resource_dictionary[event.obj.key] = event.obj
                 
         elif isinstance(event, QuitEvent):
-            self._event_manager.unregister_listener(self)
+            event_manager.unregister_listener(self)
+            
+    def __getitem__(self, index):
+        return self.resource_dictionary[index]
+        
+resources = Resources()

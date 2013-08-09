@@ -14,18 +14,23 @@ class PreloadEvent(Event):
     ''' Superclass of any Preload event, this is used to trigger the
         creation of objects from the config file settings.
     '''
-    def __init__(self, properties):
+    def __init__(self, element):
         self.name = "Preload Event"
-        self.properties = properties
+        self.element = element
         
 class SpriteSheetPreloadEvent(PreloadEvent):
-    def __init__(self, properties):
-        PreloadEvent.__init__(self, properties)
+    def __init__(self, element):
+        PreloadEvent.__init__(self, element)
         self.name = "SpriteSheet Preload Event"
+
+class SpritePreloadEvent(PreloadEvent):
+    def __init__(self, element):
+        PreloadEvent.__init__(self, element)
+        self.name = "Sprite Preload Event"
         
 class MapPreloadEvent(PreloadEvent):
-    def __init__(self, properties):
-        PreloadEvent.__init__(self, properties)
+    def __init__(self, element):
+        PreloadEvent.__init__(self, element)
         self.name = "Map Preload Event"
 
 class FactoryObjectCreatedEvent(Event):
@@ -38,7 +43,13 @@ class SpriteSheetCreatedEvent(FactoryObjectCreatedEvent):
         FactoryObjectCreatedEvent.__init__(self, obj)
         self.name = "SpriteSheet Created Event"
         self.sprite_sheet = self.obj
-
+        
+class SpriteCreatedEvent(FactoryObjectCreatedEvent):
+    def __init__(self, obj):
+        FactoryObjectCreatedEvent.__init__(self, obj)
+        self.name = "Sprite Created Event"
+        self.sprite_sheet = self.obj
+        
 class MapCreatedEvent(FactoryObjectCreatedEvent):
     def __init__(self, obj):
         FactoryObjectCreatedEvent.__init__(self, obj)
@@ -174,7 +185,7 @@ class RegisterKeyboardEvent(Event):
     ''' Make a kepress trigger an event.
     '''
     def __init__(self, event_type, event_key, eventType):
-        self.name = "Stop Scroll Request Event"
+        self.name = "Register Keyboard Event"
         self.eventType = eventType
         self.event_type = event_type
         self.event_key = event_key

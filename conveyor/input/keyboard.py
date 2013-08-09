@@ -1,4 +1,5 @@
 from conveyor.event_manager.events import TickEvent, GameStartedEvent, RegisterKeyboardEvent, QuitEvent
+from conveyor.event_manager import event_manager
 from conveyor.common import enum
 import pygame
 import pygame.locals
@@ -11,9 +12,8 @@ class KeyboardController(object):
 	keyboard and uses them to control the model, by sending Requests
 	or to control the Pygame display directly, as with the QuitEvent
     '''
-    def __init__(self, event_manager):
-	    self._event_manager = event_manager
-	    self._event_manager.register_listener(self, [GameStartedEvent, RegisterKeyboardEvent, QuitEvent])
+    def __init__(self):
+	    event_manager.register_listener(self, [GameStartedEvent, RegisterKeyboardEvent, QuitEvent])
 	    self._keyboard_events = dict()
 
     #----------------------------------------------------------------------
@@ -24,7 +24,7 @@ class KeyboardController(object):
                 key = None
 
                 if event.type == pygame.locals.QUIT:
-		    self._event_manager.post(QuitEvent())
+		    event_manager.post(QuitEvent())
 		    
 		elif event.type in (pygame.locals.KEYUP, pygame.locals.KEYDOWN):
                     key = event.key
@@ -35,7 +35,7 @@ class KeyboardController(object):
                 try:
                     
                     for eventType in self._keyboard_events[event.type][key].keys():
-                        self._event_manager.post(eventType())
+                        event_manager.post(eventType())
                 except KeyError:
                     pass
 		    
@@ -52,8 +52,8 @@ class KeyboardController(object):
                 self._keyboard_events[event.event_type][event.event_key][event.eventType] += 1
                 
 	elif isinstance(event, GameStartedEvent):
-            self._event_manager.unregister_listener(self, [GameStartedEvent])
-            self._event_manager.register_listener(self, [TickEvent])
+            event_manager.unregister_listener(self, [GameStartedEvent])
+            event_manager.register_listener(self, [TickEvent])
 
         elif isinstance(event, QuitEvent):
-            self._event_manager.unregister_listener(self)
+            event_manager.unregister_listener(self)

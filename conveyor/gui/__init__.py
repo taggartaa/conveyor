@@ -1,6 +1,7 @@
-from gamemap import *
-from gui_common import *
-from map_factory import *
-from sprite import *
-from sprite_sheet_factory import *
-from view import *
+from .gui_common import Drawable
+from .gamemap import Tile, Map
+from .sprite import Sprite, SpriteSheet
+from .sprite_factory import SpriteFactory
+from .sprite_sheet_factory import SpriteSheetFactory
+from .map_factory import MapFactory
+from .view import View

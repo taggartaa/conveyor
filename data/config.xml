@@ -1,10 +1,16 @@
 <configuration>
+	<spritesheets>
+		<spritesheet key="conveyor" image="{DATA_PATH}{IMAGES}conveyor.png" tile="64x64" size="448x448"/>
+	</spritesheets>
+
 	<sprites>
-		<sprite key="conveyor" image="{DATA_PATH}{IMAGES}conveyor_belt.png" tile="50x50" size="200x100"/>
-		<sprite key="grassland" image = "{DATA_PATH}{IMAGES}grasslands.png" tile="32x32" size="256x12000"/>
+		<sprite key="conveyor_slant" spritesheet="conveyor" height="2" width="2">
+			<tile gid="8"/> <tile gid="9"/>
+			<tile gid="0"/> <tile gid="16"/>
+		</sprite>
 	</sprites>
+
 	<maps>
-		<map key="second_floor" map="{DATA_PATH}{MAPS}2nd_floor.map" sprite="conveyor" char_map="/:0,_:3,\:1,|:2,L:4,7:5" layer="0" active="false" type="map"/>
-		<map key="grassland_1" map="{DATA_PATH}{MAPS}grasslands.tmx" sprite="grassland" type="tmx" active="true"/>
+		<map key="second_floor" map="{DATA_PATH}{MAPS}second_floor.xml" active="true" size="640x640" unit_size="64x64"/>
 	</maps>
 </configuration>

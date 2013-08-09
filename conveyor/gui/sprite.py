@@ -1,12 +1,47 @@
 import pygame
 import os
 
-from gui_common import Rectangle
+from conveyor.collision_detection.shapes import Rectangle
+from conveyor.event_manager import event_manager
+from conveyor.resource.resources import resources
+
+class Sprite(object):
+    ''' Used to combine several pieces of a sprite sheet into one image.
+    '''
+    def __init__(self, key, sprite_sheet_key, tile_map, height, width):
+        self.key = key
+        self._sprite_sheet_key = sprite_sheet_key
+        self._tile_map = tile_map
+        self.height = height
+        self.width = width
+        
+        self.initialize()
+        
+    @property
+    def image(self):
+        return self._original_image
+        
+    @image.setter
+    def image(self, value):
+        self._original_image = value
+        return self._original_image
+        
+    def initialize(self):
+        self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA, 32)
+        
+        for row in range(len(self._tile_map)):
+            for column in range(len(self._tile_map[row])):
+                if self._tile_map[row][column] > 0:
+                    sprite_sheet = resources[self._sprite_sheet_key]
+                    self.image.blit(sprite_sheet[self._tile_map[row][column]],
+                                             (column*sprite_sheet.tile_width,
+                                              row*sprite_sheet.tile_height))
+        
 
 class SpriteSheet(object):
     ''' Used to load a set of sprites from a sprite sheet.
     '''
-    def __init__(self, key, filename, sheet_size=(30,30), tile_size=(10,10)):
+    def __init__(self, key, filename, sheet_size, tile_size):
         self.key = key
         self.width, self.height = sheet_size
         self.tile_width, self.tile_height = tile_size
@@ -36,5 +71,3 @@ class SpriteSheet(object):
 
     def __getitem__(self, index):
         return self._sprites[index]
-
-    

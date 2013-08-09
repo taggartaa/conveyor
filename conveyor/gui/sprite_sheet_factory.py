@@ -1,17 +1,17 @@
 from sprite import SpriteSheet
 from conveyor.event_manager.events import SpriteSheetPreloadEvent, SpriteSheetCreatedEvent, QuitEvent
+from conveyor.event_manager import event_manager
 
 class SpriteSheetFactory(object):
     ''' SpriteSheet Factory Class
         Manufacutres SpriteSheet objects and sends them to the eventhandler
         to whoever is listening.
     '''
-    def __init__(self, event_manager):
+    def __init__(self):
         ''' Constructor
             event_manager - the event manager to send SpriteSheet creation events to.
         '''
-        self._event_manager = event_manager
-        self._event_manager.register_listener(self, [SpriteSheetPreloadEvent, QuitEvent])
+        event_manager.register_listener(self, [SpriteSheetPreloadEvent, QuitEvent])
 
 
     def notify(self, event):
@@ -19,21 +19,21 @@ class SpriteSheetFactory(object):
             event - the event that occured.
         '''
         if isinstance(event, SpriteSheetPreloadEvent):
-            self._create_sprite_sheet(event.properties)
+            self._create_sprite_sheet(event.element)
 
         elif isinstance(event, QuitEvent):
-            self._event_manager.unregister_listener(self)
+            event_manager.unregister_listener(self)
 
-    def _create_sprite_sheet(self, properties):
+    def _create_sprite_sheet(self, element):
         ''' private function that creates a SpriteSheet
-            properties - a dictionary of properties defining how the SpriteSheet is created.
+            element - an xml element with the attributes of the spritesheet
         '''
-        key = properties['key']
-        filename = properties['image']
-        tmp = properties['size'].lower().split('x')
+        key = element.attributes['key'].value
+        filename = element.attributes['image'].value
+        tmp = element.attributes['size'].value.lower().split('x')
         sheet_size = (int(tmp[0]), int(tmp[1]))
-        tmp = properties['tile'].lower().split('x')
+        tmp = element.attributes['tile'].value.lower().split('x')
         tile_size = (int(tmp[0]), int(tmp[1]))
         sprite_sheet = SpriteSheet(key, filename, sheet_size, tile_size)
-        self._event_manager.post(SpriteSheetCreatedEvent(sprite_sheet))
+        event_manager.post(SpriteSheetCreatedEvent(sprite_sheet))
         

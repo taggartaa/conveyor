@@ -1,2 +1,2 @@
-from cpu_spinner import *
-from game import *
+from .cpu_spinner import CPUSpinnerController
+from .game import Game
