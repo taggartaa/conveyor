@@ -8,7 +8,7 @@ from conveyor.resource.resources import resources
 class Sprite(object):
     ''' Used to combine several pieces of a sprite sheet into one image.
     '''
-    def __init__(self, key, sprite_sheet_key, tile_map, height, width):
+    def __init__(self, key, sprite_sheet_key, tile_map, width, height):
         self.key = key
         self._sprite_sheet_key = sprite_sheet_key
         self._tile_map = tile_map

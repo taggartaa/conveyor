@@ -27,11 +27,11 @@ class Tile(Drawable):
 class Map(Drawable):
     ''' Used to draw a map to a surface on a particuler layer.
     '''
-    def __init__(self, key, layer, tile_map, active, size, unit_size):
+    def __init__(self, key, layer, tiles, active, size, unit_size):
         ''' Constructor
             key             - A unique name given to this map.
             layer           - The layer this Map is on.
-            tile_map        - The map indicating where to place tiles.
+            tiles           - A list of tiles on the Map.
             active          - Determins if the map is currently visable.
             size            - The size of the map in pixels.
         '''
@@ -41,7 +41,7 @@ class Map(Drawable):
         self.size = size
         
         event_manager.register_listener(self, [DrawLayerEvent, QuitEvent])
-        self._tile_map = tile_map
+        self._tiles = tiles
         self._unit_size = unit_size
         self._active = active
         self._scale_factor = 1
@@ -99,20 +99,9 @@ class Map(Drawable):
 
     def _cache_surface(self):
         self._cache.fill((0,0,0,0))
-
-        row_idx = 0
-        col_idx = 0
         
-        for row in self._tile_map:
-            for sprite_key in row:
-                if sprite_key != '':
-                    print "Draw sprite on cache: %s (%d, %d)" %(sprite_key, col_idx*self._unit_size[0], row_idx*self._unit_size[1])
-                    print "Affected area: %s" %(str(self._cache.blit(resources[sprite_key].image,(col_idx*self._unit_size[0], row_idx*self._unit_size[1])).size))
-                    
-                col_idx += 1
-                    
-            row_idx += 1
-            col_idx = 0
+        for tile in self._tiles:
+            self._cache.blit(tile.image, (tile.x * self._unit_size[0], tile.y * self._unit_size[1]))
 
     def _draw(self, surface, rectangle, scale_factor):
         ''' Draws the map to the surface.

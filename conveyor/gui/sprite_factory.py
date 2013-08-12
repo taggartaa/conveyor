@@ -33,22 +33,24 @@ class SpriteFactory(object):
         '''
         key = element.attributes['key'].value
         sprite_sheet_key = element.attributes['spritesheet'].value
-        height = int(element.attributes['height'].value) * resources[sprite_sheet_key].tile_height
-        width = int(element.attributes['width'].value) * resources[sprite_sheet_key].tile_width
-        tile_map = self._get_tile_map(element, width, height)
+        rows = int(element.attributes['height'].value)
+        columns = int(element.attributes['width'].value)
+        width =  columns * resources[sprite_sheet_key].tile_width
+        height = rows * resources[sprite_sheet_key].tile_height
+        tile_map = self._get_tile_map(element, columns)
         
-        sprite = Sprite(key, sprite_sheet_key, tile_map, height, width)
+        sprite = Sprite(key, sprite_sheet_key, tile_map, width, height)
         event_manager.post(SpriteCreatedEvent(sprite))
 
-    def _get_tile_map(self, element, width, height):
+    def _get_tile_map(self, element, columns):
         ''' Creates tile_map from an xml element '''
         tile_map = []
         count = 0
         for tile in element.getElementsByTagName('tile'):
-            if int(count/width) == len(tile_map):
+            if int(count/columns) == len(tile_map):
                 tile_map.append([])
             
-            tile_map[count/width].append(int(tile.attributes['gid'].value))
+            tile_map[count/columns].append(int(tile.attributes['gid'].value))
             count += 1
         
         return tile_map

@@ -1,12 +1,32 @@
-<configuration>
+<configuration> * 
 	<spritesheets>
 		<spritesheet key="conveyor" image="{DATA_PATH}{IMAGES}conveyor.png" tile="64x64" size="448x448"/>
 	</spritesheets>
 
 	<sprites>
-		<sprite key="conveyor_slant" spritesheet="conveyor" height="2" width="2">
+		<sprite key="conveyor_slant_right" spritesheet="conveyor" height="2" width="2">
 			<tile gid="8"/> <tile gid="9"/>
 			<tile gid="0"/> <tile gid="16"/>
+		</sprite>
+
+		<sprite key="conveyor_slant_left" spritesheet="conveyor" height="2" width="2">
+			<tile gid="11"/> <tile gid="12"/>
+			<tile gid="18"/> <tile gid="0"/>
+		</sprite>
+
+		<sprite key="conveyor_corner_upper_right" spritesheet="conveyor" height="2" width="2">
+			<tile gid="2"/> <tile gid="3"/>
+			<tile gid="0"/> <tile gid="10"/>
+		</sprite>
+
+		<sprite key="conveyor_corner_upper_left" spritesheet="conveyor" height="2" width="2">
+			<tile gid="3"/> <tile gid="4"/>
+			<tile gid="24"/> <tile gid="0"/>
+		</sprite>
+        
+		<sprite key="conveyor_straight_upper" spritesheet="conveyor" height="2" width="1">
+            <tile gid="3"/>
+            <tile gid="17"/>
 		</sprite>
 	</sprites>
 

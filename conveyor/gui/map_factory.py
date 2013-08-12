@@ -1,4 +1,4 @@
-from gamemap import Map
+from gamemap import Map, Tile
 from conveyor.event_manager.events import MapPreloadEvent, MapCreatedEvent, QuitEvent
 from conveyor.event_manager import event_manager
 from xml.dom import minidom
@@ -37,15 +37,16 @@ class MapFactory(object):
         tmp = element.attributes['unit_size'].value.lower().split('x')
         unit_size = (int(tmp[0]), int(tmp[1]))
         
-        tile_map = []
+        tiles = []
         
         xmldoc = minidom.parse(element.attributes['map'].value)
-        for row in xmldoc.getElementsByTagName('row'):
-            tile_map.append([])
-            for tile in row.getElementsByTagName('tile'):
-                tile_map[-1].append(tile.getAttribute('sprite'))
+        for tile in xmldoc.getElementsByTagName('tile'):
+            sprite_key = tile.attributes['sprite'].value
+            x = int(tile.attributes['x'].value)
+            y = int(tile.attributes['y'].value)
+            tiles.append(Tile(0, sprite_key, x, y))
                 
-        map = Map(key, 0, tile_map, active, size, unit_size)
+        map = Map(key, 0, tiles, active, size, unit_size)
         event_manager.post(MapCreatedEvent(map))
             
  

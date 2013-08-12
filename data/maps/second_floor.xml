@@ -1,3 +1,7 @@
-<row>
-    <tile sprite="conveyor_slant"/>
-</row>
+<map>
+    <tile sprite="conveyor_corner_upper_right"  x="1" y="0"/>
+    <tile sprite="conveyor_slant_right"         x="0" y="1"/>
+    <tile sprite="conveyor_straight_upper"      x="3" y="0"/>
+    <tile sprite="conveyor_corner_upper_left"   x="4" y="0"/>
+    <tile sprite="conveyor_slant_left"          x="5" y="1"/>
+</map>
